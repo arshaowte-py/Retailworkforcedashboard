@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frido Retail — Workforce Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060810;--sf:#0C0D17;--sf2:#12131D;--sf3:#181927;
+  --bd:rgba(255,255,255,.055);--bd2:rgba(255,255,255,.10);
+  --acc:#FF5722;
+  --g:#00E676;--gd:rgba(0,230,118,.10);
+  --am:#FFB300;--amd:rgba(255,179,0,.10);
+  --rd:#FF3D57;--rdd:rgba(255,61,87,.12);
+  --bl:#40C4FF;--bld:rgba(64,196,255,.10);
+  --tl:#1DE9B6;--tld:rgba(29,233,182,.10);
+  --pu:#CE93D8;--pud:rgba(206,147,216,.10);
+  --tx:#E8E8F4;--sub:#8080A0;--mu:#3E3E52;
+  --r:10px;--rs:6px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden;}
+.hd{position:sticky;top:0;z-index:100;background:rgba(6,8,16,.94);backdrop-filter:blur(24px);border-bottom:1px solid var(--bd);height:54px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.brand{display:flex;align-items:center;gap:9px;flex-shrink:0;}
+.blogo{width:28px;height:28px;border-radius:7px;background:var(--acc);font-family:'Syne',sans-serif;font-weight:800;font-size:11px;color:#fff;display:flex;align-items:center;justify-content:center;}
+.bname{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;letter-spacing:-.3px;}
+.bsub{color:var(--mu);font-size:11px;}
+.hd-c{display:flex;align-items:center;gap:6px;}
+.nbtn{width:24px;height:24px;border-radius:4px;background:var(--sf2);border:1px solid var(--bd);color:var(--sub);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .13s;}
+.nbtn:hover{background:var(--sf3);color:var(--tx);}
+.dbox{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;min-width:210px;text-align:center;}
+.dbox small{display:block;font-family:'IBM Plex Sans',sans-serif;font-weight:400;font-size:9px;color:var(--mu);letter-spacing:.5px;text-transform:uppercase;margin-top:1px;}
+.wpill{display:none;align-items:center;gap:4px;background:var(--amd);border:1px solid rgba(255,179,0,.18);color:var(--am);font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;}
+.wpill.on{display:flex;}
+.hd-r{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.lpill{display:flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600;border:1px solid var(--bd);}
+.lpill.live{background:var(--gd);border-color:rgba(0,230,118,.18);color:var(--g);}
+.lpill.off{background:var(--sf2);color:var(--sub);}
+.ldot{width:5px;height:5px;border-radius:50%;}
+.lpill.live .ldot{background:var(--g);animation:pg 1.6s ease infinite;}
+.lpill.off .ldot{background:var(--mu);}
+@keyframes pg{0%,100%{opacity:1;}50%{opacity:.3;}}
+.hbtn{height:28px;padding:0 11px;border-radius:5px;font-size:10px;font-weight:700;cursor:pointer;transition:all .13s;border:1px solid;display:flex;align-items:center;gap:5px;}
+.hg{background:var(--sf2);border-color:var(--bd);color:var(--sub);}
+.hg:hover{background:var(--sf3);color:var(--tx);}
+.ha{background:var(--acc);border-color:var(--acc);color:#fff;}
+.ha:hover{background:#E64A19;}
+/* INSIGHT BAR */
+.ibar{margin:12px 20px 0;padding:9px 14px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rs);display:flex;align-items:center;gap:10px;}
+.ib-icon{font-size:13px;flex-shrink:0;}
+.ib-items{display:flex;flex:1;overflow:hidden;flex-wrap:wrap;gap:0;}
+.ibi{display:flex;align-items:center;padding:0 12px;border-right:1px solid var(--bd);font-size:10px;font-weight:500;color:var(--sub);white-space:nowrap;}
+.ibi:first-child{padding-left:0;}
+.ibi:last-child{border-right:none;}
+.ibi b{font-weight:700;}
+.ibi.crit b{color:var(--rd);}
+.ibi.warn b{color:var(--am);}
+.ibi.ok b{color:var(--g);}
+.ibi.info b{color:var(--bl);}
+.ib-t{margin-left:auto;font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);flex-shrink:0;padding-left:10px;}
+/* METRICS */
+.metrics{display:flex;gap:9px;padding:12px 20px 0;overflow-x:auto;scrollbar-width:none;}
+.metrics::-webkit-scrollbar{display:none;}
+.mc-hero{flex:0 0 210px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px;position:relative;overflow:hidden;}
+.mc-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g);}
+.mhi{display:flex;align-items:center;gap:14px;}
+.mhr{flex-shrink:0;position:relative;}
+.mhr svg{display:block;}
+.mhr-lbl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-weight:500;font-size:12px;color:var(--tx);}
+.mh-v{font-family:'DM Mono',monospace;font-weight:500;font-size:30px;line-height:1;color:var(--tx);letter-spacing:-1.5px;}
+.mh-l{font-size:9px;color:var(--mu);letter-spacing:.5px;font-weight:600;text-transform:uppercase;margin-top:3px;}
+.mh-s{font-size:9px;color:var(--mu);margin-top:4px;font-family:'DM Mono',monospace;}
+.mc{flex:1;min-width:128px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:14px 15px 11px;position:relative;overflow:hidden;display:flex;flex-direction:column;}
+.mc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--cc,#555);}
+.mc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;flex:1;}
+.mc-l{flex:1;}
+.mv{font-family:'DM Mono',monospace;font-weight:500;font-size:34px;line-height:1;color:var(--tx);letter-spacing:-2px;margin-bottom:4px;}
+.mvu{font-size:16px;font-weight:400;opacity:.5;letter-spacing:0;}
+.ml{font-size:9px;color:var(--mu);letter-spacing:.5px;font-weight:600;text-transform:uppercase;}
+.ms{font-size:9px;color:var(--mu);margin-top:3px;font-family:'DM Mono',monospace;}
+.mcd{flex-shrink:0;font-family:'DM Mono',monospace;font-size:10px;font-weight:500;padding:2px 5px;border-radius:3px;margin-top:2px;}
+.dup{background:var(--gd);color:var(--g);}
+.ddn{background:var(--rdd);color:var(--rd);}
+.dfl{background:var(--sf3);color:var(--sub);}
+.spk{height:26px;margin-top:8px;}
+.spk svg{display:block;width:100%;height:100%;}
+.mg{--cc:var(--g)}.ma{--cc:var(--am)}.mr{--cc:var(--rd)}.mb{--cc:var(--bl)}.mp{--cc:var(--pu)}.mt{--cc:var(--tl)}
+.mc-pod{--cc:var(--tl);cursor:pointer;}
+.mc-pod:hover{border-color:var(--bd2);}
+/* FILTER */
+.frow{padding:14px 20px 0;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.ftabs{display:flex;gap:3px;background:var(--sf);border:1px solid var(--bd);border-radius:6px;padding:3px;}
+.ftab{height:24px;padding:0 11px;border-radius:4px;border:none;font-family:'IBM Plex Sans',sans-serif;font-size:10px;font-weight:600;cursor:pointer;transition:all .13s;background:transparent;color:var(--sub);}
+.ftab:hover{color:var(--tx);}
+.ftab.act{background:var(--sf3);color:var(--tx);}
+.ftab.act.fatt{background:var(--rdd);color:var(--rd);}
+.ftab.act.fful{background:var(--gd);color:var(--g);}
+.ftab.act.frst{background:var(--amd);color:var(--am);}
+.ftab.act.fpod{background:var(--tld);color:var(--tl);}
+.fr{display:flex;align-items:center;gap:8px;}
+.sbadge{display:flex;align-items:center;gap:4px;font-size:9px;font-weight:700;letter-spacing:.3px;padding:2px 8px;border-radius:4px;}
+.smanual{background:var(--sf3);color:var(--sub);}
+.ssel{height:26px;padding:0 8px;border-radius:4px;background:var(--sf2);border:1px solid var(--bd);font-family:'IBM Plex Sans',sans-serif;font-size:10px;color:var(--sub);cursor:pointer;outline:none;}
+/* SECTION */
+.sec{padding:12px 20px 8px;display:flex;align-items:center;justify-content:space-between;}
+.sct{font-family:'Syne',sans-serif;font-weight:700;font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--sub);}
+.sch{font-size:9px;color:var(--mu);}
+/* GRID */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:8px;padding:0 20px 20px;}
+/* CARD */
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);cursor:pointer;position:relative;overflow:hidden;transition:border-color .18s,transform .13s,box-shadow .18s;animation:fi .3s ease both;}
+.card.hidden{display:none;}
+.card:hover{border-color:var(--bd2);transform:translateY(-1px);box-shadow:0 6px 22px rgba(0,0,0,.55);}
+.card.sel{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc),0 6px 22px rgba(255,87,34,.12);}
+.cbar{height:2px;}
+.ok .cbar{background:var(--g);}
+.warn .cbar{background:var(--am);}
+.crit .cbar{background:var(--rd);}
+.cbody{padding:12px 12px 12px 18px;}
+.ctop{display:flex;align-items:flex-start;justify-content:space-between;gap:5px;margin-bottom:8px;}
+.cname{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;line-height:1.3;}
+.cloc{font-size:9px;color:var(--mu);margin-top:2px;}
+.ccode{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);margin-top:1px;}
+.cbadges{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;}
+.badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap;}
+.bg{background:var(--gd);color:var(--g);}
+.ba{background:var(--amd);color:var(--am);}
+.br{background:var(--rdd);color:var(--rd);}
+.bt{background:var(--tld);color:var(--tl);}
+.hcw{margin-bottom:8px;}
+.hcn{display:flex;align-items:baseline;gap:2px;margin-bottom:5px;}
+.hcp{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;line-height:1;letter-spacing:-.5px;}
+.ok .hcp{color:var(--g);}
+.warn .hcp{color:var(--am);}
+.crit .hcp{color:var(--rd);}
+.hcs{font-size:14px;color:var(--mu);font-family:'DM Mono',monospace;margin:0 1px;}
+.hcr{font-family:'DM Mono',monospace;font-size:13px;color:var(--sub);}
+.hcl{font-size:9px;color:var(--mu);margin-left:5px;}
+.hctrack{height:3px;background:var(--sf3);border-radius:99px;overflow:hidden;}
+.hcfill{height:100%;border-radius:99px;transition:width .4s cubic-bezier(.4,0,.2,1);}
+.chips{display:flex;flex-wrap:wrap;gap:3px;margin-top:2px;}
+.chip{display:flex;align-items:center;gap:3px;padding:2px 6px 2px 2px;background:var(--sf2);border:1px solid var(--bd);border-radius:99px;font-size:9px;color:var(--sub);}
+.chip.rest{border-color:rgba(255,61,87,.3);background:var(--rdd);}
+.cavt{width:14px;height:14px;border-radius:50%;font-family:'Syne',sans-serif;font-size:6px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.cdot{width:4px;height:4px;border-radius:50%;flex-shrink:0;}
+.ra{display:none;align-items:center;gap:5px;margin-top:6px;padding:5px 7px;background:var(--rdd);border:1px solid rgba(255,61,87,.18);border-radius:var(--rs);font-size:9px;color:var(--rd);font-weight:600;}
+.ra.on{display:flex;}
+.radot{width:4px;height:4px;border-radius:50%;background:var(--rd);animation:pr 1.3s ease infinite;}
+.rnk{position:absolute;top:8px;left:6px;width:17px;height:17px;border-radius:50%;background:var(--sf3);font-family:'DM Mono',monospace;font-size:8px;display:flex;align-items:center;justify-content:center;color:var(--mu);}
+@keyframes pr{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.7);}}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+/* PODIATRIST VIEW */
+.pod-section{display:none;padding:0 20px 28px;}
+.pod-hdr{padding:12px 0 12px;display:flex;align-items:center;gap:10px;}
+.pod-hdr-t{font-family:'Syne',sans-serif;font-weight:700;font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--sub);}
+.pod-hdr-line{flex:1;height:1px;background:var(--bd);}
+.pod-hdr-sub{font-size:9px;color:var(--mu);}
+.pod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;}
+.pod-card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;transition:border-color .18s,transform .13s,box-shadow .18s;animation:fi .35s ease both;}
+.pod-card:hover{border-color:var(--bd2);transform:translateY(-1px);box-shadow:0 6px 22px rgba(0,0,0,.5);}
+.pod-card.pcp{border-top:3px solid var(--g);}
+.pod-card.pca{border-top:3px solid var(--am);}
+.pod-card.pcl{border-top:3px solid var(--bl);}
+.pod-body{padding:18px 16px 14px;}
+.pod-top{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.pod-avt{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#00897B,#4DB6AC);font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pod-info{flex:1;min-width:0;}
+.pod-name{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--tx);}
+.pod-store{font-size:10px;color:var(--mu);margin-top:3px;}
+.pod-status-row{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--bd);}
+.pod-lbl{font-size:11px;font-weight:700;letter-spacing:.3px;display:flex;align-items:center;gap:5px;}
+.pod-lbl-dot{width:7px;height:7px;border-radius:50%;}
+.pst-present .pod-lbl{color:var(--g);}
+.pst-present .pod-lbl-dot{background:var(--g);}
+.pst-absent .pod-lbl{color:var(--am);}
+.pst-absent .pod-lbl-dot{background:var(--am);}
+.pst-leave .pod-lbl{color:var(--bl);}
+.pst-leave .pod-lbl-dot{background:var(--bl);}
+.pod-togs{display:flex;gap:3px;}
+.pod-note{margin-top:14px;padding:12px 14px;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);font-size:10px;color:var(--sub);line-height:1.6;}
+.pod-note b{color:var(--sub);}
+/* PANEL */
+.pov{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0);pointer-events:none;transition:background .28s;}
+.pov.on{background:rgba(0,0,0,.72);pointer-events:all;}
+.panel{position:fixed;top:0;right:0;bottom:0;width:440px;max-width:96vw;background:var(--sf);border-left:1px solid var(--bd);z-index:201;transform:translateX(100%);transition:transform .32s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden;}
+.panel.on{transform:translateX(0);}
+.ph{padding:16px 18px 12px;border-bottom:1px solid var(--bd);display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;}
+.psn{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;line-height:1.2;}
+.psm{font-size:10px;color:var(--mu);margin-top:3px;}
+.pcl{width:28px;height:28px;border-radius:5px;background:var(--sf2);border:1px solid var(--bd);color:var(--sub);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .13s;flex-shrink:0;}
+.pcl:hover{background:var(--sf3);color:var(--tx);}
+.psts{display:flex;border-bottom:1px solid var(--bd);flex-shrink:0;}
+.pst{flex:1;padding:10px 6px;text-align:center;border-right:1px solid var(--bd);}
+.pst:last-child{border-right:none;}
+.pstv{font-family:'DM Mono',monospace;font-weight:500;font-size:22px;letter-spacing:-.5px;}
+.pstl{font-size:8px;color:var(--mu);margin-top:1px;letter-spacing:.3px;text-transform:uppercase;}
+.psrb{display:flex;align-items:center;justify-content:space-between;padding:6px 18px;border-bottom:1px solid var(--bd);background:var(--sf2);flex-shrink:0;font-size:9px;}
+.psrl{color:var(--mu);}
+.psrr{color:var(--tl);font-weight:600;}
+.pscr{overflow-y:auto;flex:1;padding:13px 18px 20px;}
+.pscr::-webkit-scrollbar{width:3px;}
+.pscr::-webkit-scrollbar-thumb{background:var(--sf3);}
+.lrban{display:none;align-items:center;gap:6px;padding:8px 10px;background:var(--amd);border:1px solid rgba(255,179,0,.18);border-radius:var(--rs);margin-bottom:12px;font-size:10px;color:var(--am);font-weight:600;}
+.lrban.on{display:flex;}
+.rsec{margin-bottom:16px;}
+.rshd{display:flex;align-items:center;gap:7px;margin-bottom:6px;}
+.rst{font-family:'Syne',sans-serif;font-weight:700;font-size:9px;letter-spacing:.7px;text-transform:uppercase;color:var(--sub);}
+.rdv{flex:1;height:1px;background:var(--bd);}
+.srow{display:flex;align-items:center;gap:7px;padding:8px 10px;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);margin-bottom:4px;transition:border-color .18s;}
+.srow:hover{border-color:var(--bd2);}
+.srow.rn{border-color:rgba(255,61,87,.3);background:rgba(255,61,87,.03);}
+.savt{width:30px;height:30px;border-radius:50%;flex-shrink:0;font-family:'Syne',sans-serif;font-weight:700;font-size:10px;display:flex;align-items:center;justify-content:center;color:#fff;}
+.sinf{flex:1;min-width:0;}
+.snrw{display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.snm{font-size:11px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;}
+.srb{display:inline-flex;align-items:center;font-size:7px;font-weight:700;letter-spacing:.5px;padding:1px 5px;border-radius:3px;margin-top:2px;}
+.stkw{flex-shrink:0;text-align:right;}
+.sdts{display:flex;gap:2px;justify-content:flex-end;margin-bottom:2px;}
+.sd{width:6px;height:6px;border-radius:50%;background:var(--sf3);}
+.sd.f{background:var(--g);}
+.sd.w{background:var(--am);}
+.sd.d{background:var(--rd);animation:pr 1.3s ease infinite;}
+.skl{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);}
+.skl.dt{color:var(--rd);}
+.togs{display:flex;gap:2px;margin-left:4px;}
+.tb{height:20px;padding:0 5px;border-radius:3px;background:var(--sf3);border:1px solid var(--bd);font-size:8px;font-weight:700;color:var(--mu);cursor:pointer;transition:all .13s;}
+.tb:hover{color:var(--sub);}
+.tb.tp{background:var(--gd);border-color:rgba(0,230,118,.22);color:var(--g);}
+.tb.ta{background:var(--amd);border-color:rgba(255,179,0,.22);color:var(--am);}
+.tb.tl2{background:var(--bld);border-color:rgba(64,196,255,.22);color:var(--bl);}
+.tb.dis{opacity:.3;cursor:not-allowed;pointer-events:none;}
+.rbdg{display:inline-flex;align-items:center;gap:2px;background:var(--rdd);border:1px solid rgba(255,61,87,.18);color:var(--rd);font-size:7px;font-weight:700;padding:1px 4px;border-radius:3px;}
+.rbdt{width:3px;height:3px;border-radius:50%;background:var(--rd);animation:pr 1.3s ease infinite;}
+.rsm .savt{background:linear-gradient(135deg,#FF5722,#FF8A65);}
+.rasm .savt{background:linear-gradient(135deg,#5C6BC0,#9FA8DA);}
+.rcre .savt{background:linear-gradient(135deg,#0288D1,#4FC3F7);}
+.rpod .savt{background:linear-gradient(135deg,#00897B,#4DB6AC);}
+.rsb2 .savt{background:linear-gradient(135deg,#F57F17,#FFCA28);}
+.rsm .srb{background:rgba(255,87,34,.12);color:#FF8A65;}
+.rasm .srb{background:rgba(92,107,192,.12);color:#9FA8DA;}
+.rcre .srb{background:rgba(2,136,209,.12);color:#4FC3F7;}
+.rpod .srb{background:rgba(0,137,123,.12);color:#4DB6AC;}
+.rsb2 .srb{background:rgba(245,127,23,.12);color:#FFCA28;}
+/* MODAL */
+.mov{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:16px;}
+.mov.on{display:flex;}
+.modal{background:var(--sf);border:1px solid var(--bd2);border-radius:14px;width:100%;max-width:500px;box-shadow:0 28px 80px rgba(0,0,0,.7);overflow:hidden;}
+.mhd{padding:18px 20px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;}
+.mttl{font-family:'Syne',sans-serif;font-weight:800;font-size:15px;}
+.mcl2{width:26px;height:26px;border-radius:5px;background:var(--sf2);border:1px solid var(--bd);color:var(--sub);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.mcl2:hover{background:var(--sf3);}
+.mbd{padding:18px 20px;max-height:66vh;overflow-y:auto;}
+.mft{padding:12px 20px;border-top:1px solid var(--bd);display:flex;justify-content:flex-end;gap:7px;}
+.fld{margin-bottom:13px;}
+.flbl{font-size:10px;font-weight:600;color:var(--sub);letter-spacing:.3px;margin-bottom:5px;display:block;}
+.finp{width:100%;background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:8px 11px;font-family:'DM Mono',monospace;font-size:11px;color:var(--tx);outline:none;transition:border-color .18s;}
+.finp:focus{border-color:var(--bd2);}
+.fhint{font-size:9px;color:var(--mu);margin-top:4px;line-height:1.55;}
+.steps{background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:12px 14px;margin-bottom:13px;}
+.stit{font-family:'Syne',sans-serif;font-weight:700;font-size:10px;color:var(--sub);letter-spacing:.4px;text-transform:uppercase;margin-bottom:8px;}
+.step{display:flex;gap:8px;margin-bottom:6px;font-size:10px;color:var(--mu);line-height:1.55;}
+.step:last-child{margin-bottom:0;}
+.snum{width:16px;height:16px;border-radius:50%;background:var(--sf3);border:1px solid var(--bd);font-family:'Syne',sans-serif;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--sub);}
+.step b{color:var(--sub);}
+.ftbl{width:100%;border-collapse:collapse;font-size:9px;margin-bottom:13px;}
+.ftbl th{background:var(--sf3);color:var(--sub);padding:5px 8px;text-align:left;font-weight:700;letter-spacing:.3px;}
+.ftbl td{padding:5px 8px;color:var(--sub);border-bottom:1px solid var(--bd);font-family:'DM Mono',monospace;font-size:9px;line-height:1.4;}
+.ftbl tr:last-child td{border-bottom:none;}
+.mbtn{height:30px;padding:0 13px;border-radius:5px;font-size:10px;font-weight:700;cursor:pointer;transition:all .13s;border:1px solid;display:flex;align-items:center;gap:4px;}
+.mb-c{background:var(--sf2);border-color:var(--bd);color:var(--sub);}
+.mb-c:hover{background:var(--sf3);}
+.mb-s{background:var(--acc);border-color:var(--acc);color:#fff;}
+.mb-s:hover{background:#E64A19;}
+.tres{margin-top:8px;padding:8px 10px;border-radius:5px;font-size:10px;display:none;line-height:1.5;}
+.tres.ok{background:var(--gd);border:1px solid rgba(0,230,118,.18);color:var(--g);display:block;}
+.tres.err{background:var(--rdd);border:1px solid rgba(255,61,87,.18);color:var(--rd);display:block;}
+.demo-bar{background:linear-gradient(90deg,rgba(255,87,34,.15),rgba(255,179,0,.15));border:1px solid rgba(255,179,0,.2);margin:10px 20px 0;padding:7px 14px;border-radius:var(--rs);font-size:10px;color:var(--am);display:flex;align-items:center;gap:8px;}
+.demo-bar b{color:var(--tx);}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--sf3);border:1px solid var(--bd2);color:var(--tx);font-size:11px;font-weight:500;padding:8px 16px;border-radius:7px;z-index:999;transition:transform .26s cubic-bezier(.4,0,.2,1);white-space:nowrap;}
+.toast.on{transform:translateX(-50%) translateY(0);}
+body::-webkit-scrollbar{width:4px;}
+body::-webkit-scrollbar-thumb{background:var(--sf3);}
+</style>
+</head>
+<body>
+
+<header class="hd">
+  <div class="brand">
+    <div class="blogo">FR</div>
+    <div><div class="bname">Frido Retail <span class="bsub">&middot; Workforce</span></div></div>
+  </div>
+  <div class="hd-c">
+    <button class="nbtn" id="prevDay">&#8592;</button>
+    <div class="dbox"><span id="dateText">&mdash;</span><small id="dateSub">&mdash;</small></div>
+    <button class="nbtn" id="nextDay">&#8594;</button>
+    <div class="wpill" id="wpill">&#128274; Leave Blocked</div>
+  </div>
+  <div class="hd-r">
+    <div class="lpill off" id="livePill"><div class="ldot"></div><span id="liveText">Not Connected</span></div>
+    <button class="hbtn ha" onclick="openModal()">&#9889; Connect Sheet</button>
+  </div>
+</header>
+
+<div class="demo-bar">&#127358; <b>Demo Mode</b> &mdash; Sample data for presentation. Connect your Google Sheet to go live.</div>
+
+<div class="ibar">
+  <div class="ib-icon">&#128161;</div>
+  <div class="ib-items" id="ibItems"><div class="ibi">Loading&hellip;</div></div>
+  <div class="ib-t" id="ibTime"></div>
+</div>
+
+<div class="metrics">
+  <div class="mc-hero">
+    <div class="mhi">
+      <div class="mhr">
+        <svg width="58" height="58" viewBox="0 0 58 58">
+          <circle cx="29" cy="29" r="23" fill="none" stroke="var(--sf3)" stroke-width="5"/>
+          <circle id="donutArc" cx="29" cy="29" r="23" fill="none" stroke="var(--g)" stroke-width="5"
+            stroke-dasharray="144.5" stroke-dashoffset="144.5" stroke-linecap="round"
+            transform="rotate(-90 29 29)" style="transition:stroke-dashoffset .7s cubic-bezier(.4,0,.2,1),stroke .4s"/>
+        </svg>
+        <div class="mhr-lbl" id="donutPct">0%</div>
+      </div>
+      <div>
+        <div class="mh-v" id="mCov">&mdash;</div>
+        <div class="mh-l">Coverage Rate</div>
+        <div class="mh-s" id="mCovS">&mdash;</div>
+      </div>
+    </div>
+  </div>
+  <div class="mc mb">
+    <div class="mc-top">
+      <div class="mc-l">
+        <div class="mv" id="mFull">&mdash;<span class="mvu">/9</span></div>
+        <div class="ml">Stores at Capacity</div>
+        <div class="ms">fully staffed today</div>
+      </div>
+      <div class="mcd dfl" id="dFull">&mdash;</div>
+    </div>
+    <div class="spk" id="spkFull"></div>
+  </div>
+  <div class="mc ma">
+    <div class="mc-top">
+      <div class="mc-l">
+        <div class="mv" id="mUnder">&mdash;</div>
+        <div class="ml">Understaffed</div>
+        <div class="ms">stores below target</div>
+      </div>
+      <div class="mcd dfl" id="dUnder">&mdash;</div>
+    </div>
+    <div class="spk" id="spkUnder"></div>
+  </div>
+  <div class="mc mp">
+    <div class="mc-top">
+      <div class="mc-l">
+        <div class="mv" id="mLeave">&mdash;</div>
+        <div class="ml">On Leave</div>
+        <div class="ms">across all locations</div>
+      </div>
+    </div>
+  </div>
+  <div class="mc mr">
+    <div class="mc-top">
+      <div class="mc-l">
+        <div class="mv" id="mRest">&mdash;</div>
+        <div class="ml">Rest Overdue</div>
+        <div class="ms">6+ consecutive days</div>
+      </div>
+    </div>
+  </div>
+  <div class="mc mc-pod" id="podMetricCard">
+    <div class="mc-top">
+      <div class="mc-l">
+        <div class="mv" id="mPod">&mdash;<span class="mvu">/4</span></div>
+        <div class="ml">Podiatrists Available</div>
+        <div class="ms" id="mPodS">on floor today</div>
+      </div>
+      <div style="font-size:20px;opacity:.4;align-self:center;">&#129464;</div>
+    </div>
+  </div>
+</div>
+
+<div class="frow">
+  <div class="ftabs" id="tabBar">
+    <button class="ftab act" id="t-all">All Stores</button>
+    <button class="ftab fatt" id="t-att">Needs Attention</button>
+    <button class="ftab fful" id="t-ful">Fully Staffed</button>
+    <button class="ftab frst" id="t-rst">Rest Alert</button>
+    <button class="ftab fpod" id="t-pod">&#129464; Podiatrists</button>
+  </div>
+  <div class="fr" id="sortRow">
+    <div class="sbadge smanual">&bull; Demo Mode</div>
+    <select class="ssel" id="sortSel">
+      <option value="urgency">Sort: Urgency</option>
+      <option value="code">Sort: Store Code</option>
+      <option value="coverage">Sort: Coverage %</option>
+      <option value="alpha">Sort: Name A&ndash;Z</option>
+    </select>
+  </div>
+</div>
+
+<div class="sec" id="storeSecHdr">
+  <div class="sct">All Locations &mdash; 9 Stores</div>
+  <div class="sch">Click any store to see staff detail</div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="pod-section" id="podSection">
+  <div class="pod-hdr">
+    <div class="pod-hdr-t">&#129464; Podiatrist Availability</div>
+    <div class="pod-hdr-line"></div>
+    <div class="pod-hdr-sub">4 podiatrists &mdash; toggle status below</div>
+  </div>
+  <div class="pod-grid" id="podGrid"></div>
+  <div class="pod-note">
+    <b>Note:</b> Podiatrists submit their availability via the same Google Form each evening.
+    Once your Sheet is connected, their status updates here automatically from form responses.
+    You can also manually override any status using the toggles above.
+  </div>
+</div>
+
+<div class="pov" id="pov" onclick="closePanel()"></div>
+<div class="panel" id="panel">
+  <div class="ph">
+    <div><div class="psn" id="pName">&mdash;</div><div class="psm" id="pMeta">&mdash;</div></div>
+    <button class="pcl" onclick="closePanel()">&#10005;</button>
+  </div>
+  <div class="psts">
+    <div class="pst"><div class="pstv" id="pP">&mdash;</div><div class="pstl">Present</div></div>
+    <div class="pst"><div class="pstv" id="pA">&mdash;</div><div class="pstl">Absent</div></div>
+    <div class="pst"><div class="pstv" id="pL">&mdash;</div><div class="pstl">On Leave</div></div>
+    <div class="pst"><div class="pstv" id="pR">&mdash;</div><div class="pstl">Required</div></div>
+  </div>
+  <div class="psrb">
+    <div class="psrl">Demo data &mdash; connect Sheet to go live</div>
+    <div class="psrr" id="pSrcR"></div>
+  </div>
+  <div class="pscr">
+    <div class="lrban" id="lrban">&#128274; Leave cannot be marked on Fri &middot; Sat &middot; Sun</div>
+    <div id="pContent"></div>
+  </div>
+</div>
+
+<div class="mov" id="mov">
+  <div class="modal">
+    <div class="mhd">
+      <div class="mttl">&#9889; Connect Google Sheet</div>
+      <button class="mcl2" onclick="closeModal()">&#10005;</button>
+    </div>
+    <div class="mbd">
+      <div class="steps">
+        <div class="stit">Setup &mdash; 4 Steps</div>
+        <div class="step"><div class="snum">1</div><div>Run the <b>Google Apps Script</b> provided &mdash; auto-creates the Form + Sheet in one click.</div></div>
+        <div class="step"><div class="snum">2</div><div>In the Sheet: <b>File &rarr; Share &rarr; Publish to web &rarr; Responses &rarr; CSV &rarr; Publish</b></div></div>
+        <div class="step"><div class="snum">3</div><div>Paste the published CSV URL below. Dashboard auto-syncs every 5 minutes.</div></div>
+        <div class="step"><div class="snum">4</div><div>Share the Google Form link with all store staff to fill each evening.</div></div>
+      </div>
+      <table class="ftbl">
+        <thead><tr><th>#</th><th>Question</th><th>Type</th><th>Values</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Timestamp</td><td>Auto</td><td>Auto by Google</td></tr>
+          <tr><td>2</td><td>Store Name</td><td>Dropdown</td><td>Store_0001 &ndash; Store_0009</td></tr>
+          <tr><td>3</td><td>Your Full Name</td><td>Text</td><td>Free text</td></tr>
+          <tr><td>4</td><td>Your Role</td><td>Dropdown</td><td>SM / ASM / CRE / Podiatrist / SB</td></tr>
+          <tr><td>5</td><td>Availability Tomorrow</td><td>Dropdown</td><td>Present / Absent / On Leave</td></tr>
+        </tbody>
+      </table>
+      <div class="fld">
+        <label class="flbl">Published CSV URL *</label>
+        <input class="finp" id="csvUrlInp" type="text" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv">
+        <div class="fhint">File &rarr; Share &rarr; Publish to web &rarr; Responses &rarr; CSV &rarr; Publish &rarr; copy URL</div>
+      </div>
+      <div class="fld">
+        <label class="flbl">Google Form URL (optional)</label>
+        <input class="finp" id="formUrlInp" type="text" placeholder="https://forms.gle/...">
+      </div>
+    </div>
+    <div class="mft">
+      <button class="mbtn mb-c" onclick="closeModal()">Cancel</button>
+      <button class="mbtn mb-s" onclick="saveConn()">Save &amp; Connect</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════ DATA ══════
+var STORES = [
+  { id:'s1', code:'Store_0001', name:'Pheonix Marketcity', loc:'Vimannagar, Pune', req:3,
+    staff:[
+      {id:'p1',  name:'Krishna Awate',     role:'ASM', status:'present', streak:6},
+      {id:'p2',  name:'Rohan Desai',       role:'CRE', status:'present', streak:3}
+    ]
+  },
+  { id:'s2', code:'Store_0002', name:'Amanora Mall', loc:'Magarpatta, Pune', req:3,
+    staff:[
+      {id:'p4',  name:'Akash Sontakke',    role:'SM',  status:'present', streak:5},
+      {id:'p5',  name:'Sneha Patil',       role:'CRE', status:'absent',  streak:0},
+      {id:'p6',  name:'Rahul Gupta',       role:'CRE', status:'present', streak:2}
+    ]
+  },
+  { id:'s3', code:'Store_0003', name:'Amar Tech Park', loc:'Balewadi, Pune', req:3,
+    staff:[
+      {id:'p7',  name:'Mayur Padol',       role:'ASM', status:'present', streak:4},
+      {id:'p8',  name:'Rajendra Londhe',   role:'CRE', status:'leave',   streak:0}
+    ]
+  },
+  { id:'s4', code:'Store_0004', name:'Elpro Mall', loc:'PCMC, Pune', req:3,
+    staff:[
+      {id:'p10', name:'Prasad Phatale',    role:'SM',  status:'present', streak:6},
+      {id:'p11', name:'Aditya Sontakke',   role:'CRE', status:'present', streak:3}
+    ]
+  },
+  { id:'s5', code:'Store_0005', name:'Nexus Westend', loc:'Aundh, Pune', req:3,
+    staff:[
+      {id:'p12', name:'Kunal Singh',       role:'SM',  status:'present', streak:3},
+      {id:'p13', name:'Awanindra Pandey',  role:'CRE', status:'present', streak:2}
+    ]
+  },
+  { id:'s6', code:'Store_0006', name:'Kopa Mall', loc:'Ghorpadi KP, Pune', req:4,
+    staff:[
+      {id:'p15', name:'Shubham Gupta',     role:'ASM', status:'present', streak:4},
+      {id:'p16', name:'Sohail Shalla',     role:'CRE', status:'present', streak:1},
+      {id:'p17', name:'Uddesh',            role:'SB',  status:'present', streak:2}
+    ]
+  },
+  { id:'s7', code:'Store_0007', name:'Mall of Asia', loc:'Pune', req:2,
+    staff:[
+      {id:'p19', name:'Sharath Kumar K',   role:'SM',  status:'present', streak:5},
+      {id:'p20', name:'Divya Rao',         role:'CRE', status:'leave',   streak:0}
+    ]
+  },
+  { id:'s8', code:'Store_0008', name:'Lakeshore', loc:'Y Junction, Pune', req:3,
+    staff:[
+      {id:'p21', name:'P. Sai Dinesh',     role:'SM',  status:'present', streak:6},
+      {id:'p22', name:'Abdul Syed Jalal',  role:'CRE', status:'absent',  streak:0}
+    ]
+  },
+  { id:'s9', code:'Store_0009', name:'Oberoi Sky City Mall', loc:'Pune', req:3,
+    staff:[
+      {id:'p24', name:'Danish',            role:'ASM', status:'present', streak:2},
+      {id:'p25', name:'Anas',              role:'CRE', status:'present', streak:1}
+    ]
+  }
+];
+
+var PODS = [
+  {id:'pod1', name:'Amaan Ashfaque', store:'Kopa Mall',     storeId:'s6', status:'present', streak:2},
+  {id:'pod2', name:'Rituparna De',   store:'Amanora Mall',  storeId:'s2', status:'present', streak:3},
+  {id:'pod3', name:'Ankita',         store:'Elpro Mall',    storeId:'s4', status:'absent',  streak:0},
+  {id:'pod4', name:'Amrita Gajja',   store:'Nexus Westend', storeId:'s5', status:'present', streak:1}
+];
+
+var ROLE_CLS = {SM:'rsm', ASM:'rasm', CRE:'rcre', Podiatrist:'rpod', SB:'rsb2'};
+var ROLE_LBL = {SM:'SM', ASM:'ASM', CRE:'CRE', Podiatrist:'POD', SB:'SB'};
+var AV = [
+  'linear-gradient(135deg,#FF5722,#FF8A65)',
+  'linear-gradient(135deg,#5C6BC0,#9FA8DA)',
+  'linear-gradient(135deg,#0288D1,#4FC3F7)',
+  'linear-gradient(135deg,#2E7D32,#81C784)',
+  'linear-gradient(135deg,#C62828,#EF9A9A)',
+  'linear-gradient(135deg,#00695C,#4DB6AC)',
+  'linear-gradient(135deg,#F57F17,#FFCA28)',
+  'linear-gradient(135deg,#7B1FA2,#CE93D8)'
+];
+
+// ══════ STATE ══════
+var today = new Date(); today.setHours(0,0,0,0);
+var current = new Date(today);
+var selectedId = null;
+var activeView = 'all';
+var attOvr = {};
+var podOvr = {};
+
+// ══════ HELPERS ══════
+function dkey(d) {
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function isWE(d) { var v=d.getDay(); return v===0||v===5||v===6; }
+function ini(n) {
+  return n.trim().split(/\s+/).map(function(p){return p[0];}).slice(0,2).join('').toUpperCase();
+}
+function avc(i) { return AV[Math.abs(i)%AV.length]; }
+function mname(d) {
+  return ['January','February','March','April','May','June','July',
+          'August','September','October','November','December'][d.getMonth()];
+}
+function dname(d) {
+  return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()];
+}
+function toast(msg) {
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('on');
+  setTimeout(function(){t.classList.remove('on');}, 2400);
+}
+function getStaff(pid) {
+  var dk=dkey(current);
+  if(attOvr[dk] && attOvr[dk][pid]!==undefined) return attOvr[dk][pid];
+  var dk0=dkey(today);
+  if(dk===dk0) {
+    for(var i=0;i<STORES.length;i++)
+      for(var j=0;j<STORES[i].staff.length;j++)
+        if(STORES[i].staff[j].id===pid) return STORES[i].staff[j].status;
+  }
+  return 'present';
+}
+function setStaff(pid, st) {
+  var dk=dkey(current);
+  if(!attOvr[dk]) attOvr[dk]={};
+  attOvr[dk][pid]=st;
+}
+function getPod(pid) {
+  if(podOvr[pid]!==undefined) return podOvr[pid];
+  for(var i=0;i<PODS.length;i++) if(PODS[i].id===pid) return PODS[i].status;
+  return 'present';
+}
+function setPod(pid, st) { podOvr[pid]=st; renderAll(); }
+function getStreak(pid) {
+  for(var i=0;i<STORES.length;i++)
+    for(var j=0;j<STORES[i].staff.length;j++)
+      if(STORES[i].staff[j].id===pid) return STORES[i].staff[j].streak||0;
+  return 0;
+}
+
+// ══════ STATS ══════
+function storeSt(s) {
+  var p=0,a=0,l=0,r=0;
+  for(var i=0;i<s.staff.length;i++){
+    var m=s.staff[i], st=getStaff(m.id);
+    if(st==='present') p++;
+    else if(st==='absent') a++;
+    else l++;
+    if(m.streak>=6 && st==='present') r++;
+  }
+  var gap=s.req-p, status=gap<=0?'ok':gap===1?'warn':'crit';
+  return {pres:p, abs:a, lv:l, rest:r, gap:gap, status:status, pct:s.req>0?Math.round(p/s.req*100):0};
+}
+function globalSt() {
+  var tp=0,tt=0,tl=0,full=0,under=0,ro=0;
+  for(var i=0;i<STORES.length;i++){
+    var st=storeSt(STORES[i]);
+    tp+=st.pres; tt+=STORES[i].staff.length; tl+=st.lv;
+    if(st.status==='ok') full++; else under++;
+    for(var j=0;j<STORES[i].staff.length;j++)
+      if(STORES[i].staff[j].streak>=6) ro++;
+  }
+  return {tp:tp,tt:tt,tl:tl,full:full,under:under,ro:ro,pct:tt>0?Math.round(tp/tt*100):0};
+}
+function podAvailCount() {
+  var n=0;
+  for(var i=0;i<PODS.length;i++) if(getPod(PODS[i].id)==='present') n++;
+  return n;
+}
+
+// ══════ SPARKLINE ══════
+function spk(data, color) {
+  var max=0;
+  for(var i=0;i<data.length;i++) if(data[i]>max) max=data[i];
+  if(!max) max=1;
+  var pts='';
+  for(var i=0;i<data.length;i++) {
+    pts += (i*(100/(data.length-1)))+','+(24-Math.round(data[i]/max*22))+' ';
+  }
+  var lx=100, ly=24-Math.round(data[data.length-1]/max*22);
+  return '<svg viewBox="0 0 100 24" preserveAspectRatio="none" style="overflow:visible">'
+    +'<polyline points="'+pts.trim()+'" fill="none" stroke="'+color+'" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".65"/>'
+    +'<circle cx="'+lx+'" cy="'+ly+'" r="2" fill="'+color+'"/>'
+    +'</svg>';
+}
+
+// ══════ INSIGHTS ══════
+function renderInsights() {
+  var gs=globalSt();
+  var crit=STORES.filter(function(s){return storeSt(s).status==='crit';});
+  var warn=STORES.filter(function(s){return storeSt(s).status==='warn';});
+  var items=[];
+  if(crit.length) items.push('<div class="ibi crit"><b>'+crit.length+' critical</b> &mdash; '+crit.map(function(s){return s.name;}).join(', ')+'</div>');
+  if(warn.length) items.push('<div class="ibi warn"><b>'+warn.length+' understaffed by 1</b> &mdash; '+warn.map(function(s){return s.name;}).join(', ')+'</div>');
+  if(gs.ro) items.push('<div class="ibi warn"><b>'+gs.ro+' agent'+(gs.ro>1?'s':'')+' overdue</b> for rest day</div>');
+  var pa=podAvailCount();
+  if(pa < PODS.length) items.push('<div class="ibi info"><b>'+(PODS.length-pa)+' podiatrist'+(PODS.length-pa>1?'s':'')+' not on floor</b> today</div>');
+  if(!items.length) items.push('<div class="ibi ok"><b>All clear</b> &mdash; '+gs.full+'/9 stores fully staffed</div>');
+  if(isWE(current)) items.push('<div class="ibi info"><b>Weekend</b> &mdash; leave applications blocked</div>');
+  document.getElementById('ibItems').innerHTML=items.join('');
+  var now=new Date();
+  document.getElementById('ibTime').textContent=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+}
+
+// ══════ METRICS ══════
+function renderMetrics() {
+  var gs=globalSt();
+  var circ=144.5, off=circ-(circ*gs.pct/100);
+  document.getElementById('donutArc').style.strokeDashoffset=off;
+  document.getElementById('donutArc').style.stroke=gs.pct>=80?'var(--g)':gs.pct>=60?'var(--am)':'var(--rd)';
+  document.getElementById('donutPct').textContent=gs.pct+'%';
+  document.getElementById('mCov').textContent=gs.pct+'%';
+  document.getElementById('mCovS').textContent=gs.tp+' of '+gs.tt+' rostered';
+  document.getElementById('mFull').innerHTML=gs.full+'<span class="mvu">/9</span>';
+  document.getElementById('mUnder').textContent=gs.under;
+  document.getElementById('mLeave').textContent=gs.tl;
+  document.getElementById('mRest').textContent=gs.ro;
+  var pa=podAvailCount();
+  document.getElementById('mPod').innerHTML=pa+'<span class="mvu">/4</span>';
+  document.getElementById('mPodS').textContent=pa+' on floor today';
+  var dF=gs.full-5, dFEl=document.getElementById('dFull');
+  dFEl.textContent=dF>0?'+'+dF:dF<0?String(dF):'--';
+  dFEl.className='mcd '+(dF>0?'dup':dF<0?'ddn':'dfl');
+  var dU=gs.under-4, dUEl=document.getElementById('dUnder');
+  dUEl.textContent=dU>0?'+'+dU:dU<0?String(dU):'--';
+  dUEl.className='mcd '+(dU<0?'dup':dU>0?'ddn':'dfl');
+  document.getElementById('spkFull').innerHTML=spk([3,4,5,4,6,5,gs.full],'#40C4FF');
+  document.getElementById('spkUnder').innerHTML=spk([6,5,4,5,3,4,gs.under],'#FFB300');
+}
+
+// ══════ TABS / VIEW SWITCHING ══════
+function setTab(view) {
+  activeView=view;
+  var ids=['t-all','t-att','t-ful','t-rst','t-pod'];
+  for(var i=0;i<ids.length;i++) document.getElementById(ids[i]).classList.remove('act');
+  var map={all:'t-all',att:'t-att',ful:'t-ful',rst:'t-rst',pod:'t-pod'};
+  document.getElementById(map[view]).classList.add('act');
+  var isPod=(view==='pod');
+  document.getElementById('grid').style.display=isPod?'none':'';
+  document.getElementById('podSection').style.display=isPod?'block':'none';
+  document.getElementById('storeSecHdr').style.display=isPod?'none':'';
+  document.getElementById('sortRow').style.display=isPod?'none':'';
+  if(isPod) renderPodGrid(); else renderGrid();
+}
+
+// ══════ GRID ══════
+function passFilter(s) {
+  if(activeView==='all') return true;
+  var st=storeSt(s);
+  if(activeView==='att') return st.status!=='ok';
+  if(activeView==='ful') return st.status==='ok';
+  if(activeView==='rst') return st.rest>0;
+  return true;
+}
+function sortedStores() {
+  var sort=document.getElementById('sortSel').value;
+  var arr=STORES.slice();
+  if(sort==='code') return arr;
+  if(sort==='alpha') return arr.sort(function(a,b){return a.name.localeCompare(b.name);});
+  if(sort==='coverage') return arr.sort(function(a,b){return storeSt(a).pct-storeSt(b).pct;});
+  return arr.sort(function(a,b){
+    var sa=storeSt(a), sb=storeSt(b);
+    var sc=function(st){return ({crit:0,warn:1,ok:2}[st.status])+(st.rest>0?0:0.5);};
+    return sc(sa)-sc(sb);
+  });
+}
+function renderGrid() {
+  var g=document.getElementById('grid'); g.innerHTML='';
+  var sorted=sortedStores(); var vi=0;
+  for(var si=0;si<sorted.length;si++){
+    var s=sorted[si], st=storeSt(s);
+    if(!passFilter(s)) continue;
+    vi++;
+    var pct=Math.min(100,st.pct);
+    var hcClr=st.status==='ok'?'var(--g)':st.status==='warn'?'var(--am)':'var(--rd)';
+    var hBadge=st.status==='ok'?'<span class="badge bg">&#10003; Full</span>'
+               :st.status==='warn'?'<span class="badge ba">1 short</span>'
+               :'<span class="badge br">&#9650; '+st.gap+' short</span>';
+    var chips='';
+    for(var ci=0;ci<s.staff.length;ci++){
+      var p=s.staff[ci], ps=getStaff(p.id);
+      var dc=ps==='present'?'var(--g)':ps==='leave'?'var(--bl)':'var(--am)';
+      chips+='<div class="chip'+(p.streak>=6&&ps==='present'?' rest':'')+'">'
+        +'<div class="cavt" style="background:'+avc(parseInt(p.id.replace(/\D/g,''))%8)+'">'+ini(p.name)+'</div>'
+        +'<div class="cdot" style="background:'+dc+'"></div>'
+        +p.name.split(' ')[0]+'</div>';
+    }
+    var podForStore=null;
+    for(var pi=0;pi<PODS.length;pi++) if(PODS[pi].storeId===s.id){podForStore=PODS[pi];break;}
+    var podChip='';
+    if(podForStore){
+      var pst=getPod(podForStore.id);
+      var pdc=pst==='present'?'var(--g)':pst==='leave'?'var(--bl)':'var(--am)';
+      podChip='<div class="chip" style="border-color:rgba(29,233,182,.25);background:var(--tld)">'
+        +'<div class="cavt" style="background:linear-gradient(135deg,#00897B,#4DB6AC)">'+ini(podForStore.name)+'</div>'
+        +'<div class="cdot" style="background:'+pdc+'"></div>'
+        +podForStore.name.split(' ')[0]+' <span style="font-size:8px;color:var(--tl);margin-left:1px;">POD</span>'
+        +'</div>';
+    }
+    var selCls=selectedId===s.id?' sel':'';
+    g.innerHTML+='<div class="card '+s.status+selCls+'" onclick="openPanel(\''+s.id+'\')" style="animation-delay:'+(vi*.025)+'s">'
+      +'<div class="rnk">'+vi+'</div>'
+      +'<div class="cbar"></div>'
+      +'<div class="cbody">'
+        +'<div class="ctop">'
+          +'<div><div class="cname">'+s.name+'</div><div class="cloc">'+s.loc+'</div><div class="ccode">'+s.code+'</div></div>'
+          +'<div class="cbadges">'
+            +hBadge
+            +(st.rest?'<span class="badge br">&#9888; '+st.rest+'</span>':'')
+          +'</div>'
+        +'</div>'
+        +'<div class="hcw">'
+          +'<div class="hcn"><span class="hcp">'+st.pres+'</span><span class="hcs">/</span><span class="hcr">'+s.req+'</span><span class="hcl">present</span></div>'
+          +'<div class="hctrack"><div class="hcfill" style="width:'+pct+'%;background:'+hcClr+'"></div></div>'
+        +'</div>'
+        +'<div class="chips">'+chips+podChip+'</div>'
+        +(st.rest?'<div class="ra on"><div class="radot"></div>'+st.rest+' agent'+(st.rest>1?'s':'')+' need rest</div>':'')
+      +'</div>'
+    +'</div>';
+  }
+}
+
+// ══════ POD GRID ══════
+function renderPodGrid() {
+  var g=document.getElementById('podGrid'); g.innerHTML='';
+  var we=isWE(current);
+  for(var i=0;i<PODS.length;i++){
+    var pod=PODS[i], st=getPod(pod.id);
+    var cls='pod-card pst-'+st+' '+(st==='present'?'pcp':st==='absent'?'pca':'pcl');
+    var lbl=st==='present'?'On Floor':st==='leave'?'On Leave':'Absent';
+    g.innerHTML+='<div class="'+cls+'" style="animation-delay:'+(i*.07)+'s">'
+      +'<div class="pod-body">'
+        +'<div class="pod-top">'
+          +'<div class="pod-avt">'+ini(pod.name)+'</div>'
+          +'<div class="pod-info">'
+            +'<div class="pod-name">'+pod.name+'</div>'
+            +'<div class="pod-store">&#128205; '+pod.store+'</div>'
+          +'</div>'
+        +'</div>'
+        +'<div class="pod-status-row">'
+          +'<div class="pod-lbl"><div class="pod-lbl-dot"></div>'+lbl+'</div>'
+          +'<div class="pod-togs">'
+            +'<button class="tb'+(st==='present'?' tp':'')+'" onclick="setPod(\''+pod.id+'\',\'present\')">Present</button>'
+            +'<button class="tb'+(st==='absent'?' ta':'')+'" onclick="setPod(\''+pod.id+'\',\'absent\')">Absent</button>'
+            +'<button class="tb'+(we?' dis':'')+(st==='leave'?' tl2':'')+'" onclick="setPod(\''+pod.id+'\',\'leave\')">Leave</button>'
+          +'</div>'
+        +'</div>'
+      +'</div>'
+    +'</div>';
+  }
+}
+
+// ══════ PANEL ══════
+function openPanel(id) {
+  selectedId=id;
+  renderPanel();
+  document.getElementById('panel').classList.add('on');
+  document.getElementById('pov').classList.add('on');
+  renderGrid();
+}
+function closePanel() {
+  selectedId=null;
+  document.getElementById('panel').classList.remove('on');
+  document.getElementById('pov').classList.remove('on');
+  renderGrid();
+}
+function renderPanel() {
+  if(!selectedId) return;
+  var s=null;
+  for(var i=0;i<STORES.length;i++) if(STORES[i].id===selectedId){s=STORES[i];break;}
+  if(!s) return;
+  var st=storeSt(s), we=isWE(current);
+  document.getElementById('pName').textContent=s.name;
+  document.getElementById('pMeta').textContent=s.loc+' \u00b7 '+s.code+' \u00b7 '+s.req+' required';
+  document.getElementById('pP').textContent=st.pres;
+  document.getElementById('pA').textContent=st.abs;
+  document.getElementById('pL').textContent=st.lv;
+  document.getElementById('pR').textContent=s.req;
+  document.getElementById('lrban').classList.toggle('on',we);
+  var smS=[],asmS=[],creS=[],sbS=[],podS=[];
+  for(var i=0;i<s.staff.length;i++){
+    var p=s.staff[i];
+    if(p.role==='SM') smS.push(p);
+    else if(p.role==='ASM') asmS.push(p);
+    else if(p.role==='CRE') creS.push(p);
+    else sbS.push(p);
+  }
+  // Add podiatrist for this store
+  for(var i=0;i<PODS.length;i++) if(PODS[i].storeId===s.id) podS.push(PODS[i]);
+  var pc=document.getElementById('pContent');
+  pc.innerHTML=rSec('Store Manager',smS,we)+rSec('Asst. Store Manager',asmS,we)
+    +rSec('Customer Relationship Exec',creS,we)+rSec('Sales Boy',sbS,we)
+    +rSecPod('Podiatrist',podS,we);
+}
+function rSec(title, people, we) {
+  if(!people.length) return '';
+  var rows='';
+  for(var i=0;i<people.length;i++) rows+=rRow(people[i],we);
+  return '<div class="rsec"><div class="rshd"><div class="rst">'+title+'</div><div class="rdv"></div></div>'+rows+'</div>';
+}
+function rSecPod(title, pods, we) {
+  if(!pods.length) return '';
+  var rows='';
+  for(var i=0;i<pods.length;i++){
+    var pod=pods[i], st=getPod(pod.id);
+    var sc=st==='present'?'tp':st==='leave'?'tl2':'ta';
+    rows+='<div class="srow rpod" style="border-left:3px solid var(--tl)">'
+      +'<div class="savt rpod">'+ini(pod.name)+'</div>'
+      +'<div class="sinf"><div class="snrw"><span class="snm">'+pod.name+'</span></div><span class="srb rpod">POD</span></div>'
+      +'<div class="togs">'
+        +'<button class="tb'+(st==='present'?' tp':'')+'" onclick="setPod(\''+pod.id+'\',\'present\')">P</button>'
+        +'<button class="tb'+(st==='absent'?' ta':'')+'" onclick="setPod(\''+pod.id+'\',\'absent\')">A</button>'
+        +'<button class="tb'+(we?' dis':'')+(st==='leave'?' tl2':'')+'" onclick="setPod(\''+pod.id+'\',\'leave\')">L</button>'
+      +'</div>'
+    +'</div>';
+  }
+  return '<div class="rsec"><div class="rshd"><div class="rst">'+title+'</div><div class="rdv"></div></div>'+rows+'</div>';
+}
+function rRow(p, we) {
+  var status=getStaff(p.id), streak=p.streak||0, isOver=streak>=6;
+  var rc=ROLE_CLS[p.role]||'rcre', rl=ROLE_LBL[p.role]||p.role;
+  var dots='';
+  for(var i=0;i<7;i++){
+    var inS=(6-i)<streak; if(i===6) inS=(status==='present');
+    var cls=inS?(streak>=6?'d':streak>=5?'w':'f'):'';
+    dots+='<div class="sd'+(cls?' '+cls:'')+'"></div>';
+  }
+  var rb=isOver&&status==='present'?'<span class="rbdg"><span class="rbdt"></span>REST</span>':'';
+  return '<div class="srow '+rc+(isOver&&status==='present'?' rn':'')+'">'
+    +'<div class="savt">'+ini(p.name)+'</div>'
+    +'<div class="sinf"><div class="snrw"><span class="snm">'+p.name+'</span>'+rb+'</div><span class="srb">'+rl+'</span></div>'
+    +'<div class="stkw"><div class="sdts">'+dots+'</div><div class="skl'+(isOver?' dt':'')+'">'+streak+'d streak</div></div>'
+    +'<div class="togs">'
+      +'<button class="tb'+(status==='present'?' tp':'')+'" onclick="markP(\''+p.id+'\',\'present\',event)">P</button>'
+      +'<button class="tb'+(status==='absent'?' ta':'')+'" onclick="markP(\''+p.id+'\',\'absent\',event)">A</button>'
+      +'<button class="tb'+(we?' dis':'')+(status==='leave'?' tl2':'')+'" onclick="markP(\''+p.id+'\',\'leave\',event)">L</button>'
+    +'</div>'
+  +'</div>';
+}
+function markP(pid, status, e) { if(e) e.stopPropagation(); setStaff(pid,status); renderAll(); }
+
+// ══════ DATE ══════
+function renderDate() {
+  var we=isWE(current);
+  document.getElementById('dateText').textContent=dname(current)+', '+current.getDate()+' '+mname(current)+' '+current.getFullYear();
+  document.getElementById('dateSub').textContent=we?'High-Traffic Day':'Working Day';
+  document.getElementById('wpill').classList.toggle('on',we);
+}
+
+// ══════ RENDER ALL ══════
+function renderAll() {
+  renderDate(); renderInsights(); renderMetrics();
+  if(activeView==='pod') renderPodGrid(); else renderGrid();
+  if(selectedId) renderPanel();
+}
+
+// ══════ MODAL ══════
+function openModal() { document.getElementById('mov').classList.add('on'); }
+function closeModal() { document.getElementById('mov').classList.remove('on'); }
+function saveConn() {
+  var url=document.getElementById('csvUrlInp').value.trim();
+  if(!url){toast('Please enter a CSV URL');return;}
+  localStorage.setItem('fr_csv',url);
+  closeModal();
+  toast('Saved. Host the dashboard on a server to enable live sync.');
+}
+
+// ══════ EVENT WIRING ══════
+document.getElementById('prevDay').addEventListener('click',function(){
+  current.setDate(current.getDate()-1); renderAll();
+});
+document.getElementById('nextDay').addEventListener('click',function(){
+  current.setDate(current.getDate()+1); renderAll();
+});
+document.getElementById('sortSel').addEventListener('change',function(){ renderGrid(); });
+document.getElementById('t-all').addEventListener('click',function(){ setTab('all'); });
+document.getElementById('t-att').addEventListener('click',function(){ setTab('att'); });
+document.getElementById('t-ful').addEventListener('click',function(){ setTab('ful'); });
+document.getElementById('t-rst').addEventListener('click',function(){ setTab('rst'); });
+document.getElementById('t-pod').addEventListener('click',function(){ setTab('pod'); });
+document.getElementById('podMetricCard').addEventListener('click',function(){ setTab('pod'); });
+
+// ══════ INIT ══════
+var stored=localStorage.getItem('fr_csv');
+if(stored) document.getElementById('csvUrlInp').value=stored;
+renderAll();
+</script>
+</body>
+</html>
